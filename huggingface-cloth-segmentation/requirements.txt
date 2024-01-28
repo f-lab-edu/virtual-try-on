@@ -1,0 +1,10 @@
+torch
+torchvision
+gradio
+kaleido
+cohere
+openai
+gdown
+Pillow
+opencv-python
+numpy
