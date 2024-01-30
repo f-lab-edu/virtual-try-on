@@ -1,6 +1,5 @@
 from PIL import Image
 import os
-import subprocess
 import glob
 import sys
 sys.path.append("u2_segment/")
@@ -18,8 +17,12 @@ import process, network, options
 #     path = output_path + f.split("/")[-1]
 #     img_resize.save(path)
 
-def generate_edge(device='cpu', img_path="u2_segment/input/03615_00.jpg",checkpoint_path='u2_segment\model\cloth_segm.pth'):
-    process.main(device, img_path, checkpoint_path)
+def generate_edge(device='cpu', 
+                    img_path="u2_segment/input/019119_1.jpg",
+                    checkpoint_path='u2_segment\model\cloth_segm.pth',
+                    output_path='dataset\service_edge'):
+    
+    process.main(device, img_path, checkpoint_path, output_path)
 
 def resize():
     pass

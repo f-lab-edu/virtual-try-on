@@ -11,6 +11,7 @@ import cv2
 import torch.nn.functional as F
 
 
+
 if __name__ == "__main__":    
 
     opt = TestOptions().parse()
@@ -22,7 +23,7 @@ if __name__ == "__main__":
     dataset_size = len(data_loader)
     print(dataset_size)
 
-    warp_model = AFWM(opt, 3) ## 3 : number of channels
+    warp_model = AFWM(3) ## 3 : number of channels
     print(warp_model)
     warp_model.eval()
     warp_model.cuda()
@@ -38,6 +39,7 @@ if __name__ == "__main__":
     step = 0
     step_per_batch = dataset_size / opt.batchSize
 
+
     for epoch in range(1,2):
 
         for i, data in enumerate(dataset, start=epoch_iter):
@@ -45,10 +47,15 @@ if __name__ == "__main__":
             total_steps += opt.batchSize
             epoch_iter += opt.batchSize
 
+            
             real_image = data['image']
             clothes = data['clothes']
             ##edge is extracted from the clothes image with the built-in function in python
             edge = data['edge']
+
+            print(real_image.size(), real_image)
+            print(clothes.size(), clothes)
+            print(edge.size(), edge)
             edge = torch.FloatTensor((edge.detach().numpy() > 0.5).astype(np.int))
             clothes = clothes * edge        
 

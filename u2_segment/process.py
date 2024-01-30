@@ -89,9 +89,6 @@ class Normalize_image(object):
         else:
             assert "Please set proper channels! Normlization implemented only for 1, 3 and 18"
 
-
-
-
 def apply_transform(img):
     transforms_list = []
     transforms_list += [transforms.ToTensor()]
@@ -99,29 +96,27 @@ def apply_transform(img):
     transform_rgb = transforms.Compose(transforms_list)
     return transform_rgb(img)
 
-
-
-def generate_mask(input_image, net, palette, device = 'cpu'):
-
+def generate_mask(img_path, net, palette, output_path, device = 'cpu'):
     #img = Image.open(input_image).convert('RGB')
-    img = input_image
+    img = Image.open(img_path).convert('RGB')
     img_size = img.size
     img = img.resize((768, 768), Image.BICUBIC)
     image_tensor = apply_transform(img)
     image_tensor = torch.unsqueeze(image_tensor, 0)
 
-    alpha_out_dir = os.path.join('u2_segment/output','alpha')
+    # alpha_out_dir = os.path.join('u2_segment/output','alpha')
+    alpha_out_dir = output_path
     # cloth_seg_out_dir = os.path.join(opt.output,'cloth_seg')
 
     os.makedirs(alpha_out_dir, exist_ok=True)
     # os.makedirs(cloth_seg_out_dir, exist_ok=True)
 
     with torch.no_grad():
-
+        print(' 마스크 이미지 생성 중..')
         start = time.time()
         output_tensor = net(image_tensor.to(device)) #가장 많은 시간 소요 u2net.forward()
         end = time.time()
-        print(f"CPU mode : {end - start: .5f}s")
+        print(f"Segmentation 완료 ...{end - start: .5f}s 소요(CPU)")
         output_tensor = F.log_softmax(output_tensor[0], dim=1)
         output_tensor = torch.max(output_tensor, dim=1, keepdim=True)[1]
         output_tensor = torch.squeeze(output_tensor, dim=0)
@@ -140,7 +135,8 @@ def generate_mask(input_image, net, palette, device = 'cpu'):
         alpha_mask = alpha_mask[0]  # Selecting the first channel to make it 2D
         alpha_mask_img = Image.fromarray(alpha_mask, mode='L')
         alpha_mask_img = alpha_mask_img.resize(img_size, Image.BICUBIC)
-        alpha_mask_img.save(os.path.join(alpha_out_dir, f'{cls}.png'))
+        alpha_mask_img.save(os.path.join(alpha_out_dir, img_path.split("/")[-1]))
+        #  f'{cls}.jpg'   
 
     # Save final cloth segmentations
     # cloth_seg = Image.fromarray(output_arr[0].astype(np.uint8), mode='P')
@@ -187,28 +183,22 @@ def load_seg_model(checkpoint_path, device='cpu'):
 #     cloth_seg = generate_mask(img, net=model, palette=palette, device=device)
 
 
-def main(device, img_path, checkpoint_path):
+def main(device, img_path, checkpoint_path, output_path):
     # Create an instance of your model
     model = load_seg_model(checkpoint_path, device=device)
-
     palette = get_palette(2)
-
-    img = Image.open(img_path).convert('RGB')
-
-    cloth_seg = generate_mask(img, net=model, palette=palette, device=device)
+    
+    cloth_seg = generate_mask(img_path, net=model, palette=palette, device=device, output_path=output_path)
 
 
-
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Help to set arguments for Cloth Segmentation.')
-    parser.add_argument('--image', default='input/03615_00.jpg', type=str, help='Path to the input image')
-    parser.add_argument('--cuda', action='store_true', help='Enable CUDA (default: False)')
-    parser.add_argument('--checkpoint_path', type=str, default='model/cloth_segm.pth', help='Path to the checkpoint file')
-    args = parser.parse_args()
+# if __name__ == '__main__':
+#     parser = argparse.ArgumentParser(description='Help to set arguments for Cloth Segmentation.')
+#     parser.add_argument('--image', default='input/03615_00.jpg', type=str, help='Path to the input image')
+#     parser.add_argument('--cuda', action='store_true', help='Enable CUDA (default: False)')
+#     parser.add_argument('--checkpoint_path', type=str, default='model/cloth_segm.pth', help='Path to the checkpoint file')
+#     args = parser.parse_args()
 
     # gc.collect()
     # torch.cuda.empty_cache()
-    print(args)
-    main(args)
+    # print(args)
+    # main(args)
