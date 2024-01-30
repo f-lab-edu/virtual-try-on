@@ -22,7 +22,7 @@ if __name__ == "__main__":
     dataset_size = len(data_loader)
     print(dataset_size)
 
-    warp_model = AFWM(opt, 3)
+    warp_model = AFWM(opt, 3) ## 3 : number of channels
     print(warp_model)
     warp_model.eval()
     warp_model.cuda()

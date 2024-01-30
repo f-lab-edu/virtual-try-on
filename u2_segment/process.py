@@ -12,7 +12,9 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 
 from collections import OrderedDict
-from options import opt
+# from options import opt
+
+import time
 
 
 def load_checkpoint(model, checkpoint_path):
@@ -108,19 +110,23 @@ def generate_mask(input_image, net, palette, device = 'cpu'):
     image_tensor = apply_transform(img)
     image_tensor = torch.unsqueeze(image_tensor, 0)
 
-    alpha_out_dir = os.path.join(opt.output,'alpha')
-    cloth_seg_out_dir = os.path.join(opt.output,'cloth_seg')
+    alpha_out_dir = os.path.join('u2_segment/output','alpha')
+    # cloth_seg_out_dir = os.path.join(opt.output,'cloth_seg')
 
     os.makedirs(alpha_out_dir, exist_ok=True)
-    os.makedirs(cloth_seg_out_dir, exist_ok=True)
+    # os.makedirs(cloth_seg_out_dir, exist_ok=True)
 
     with torch.no_grad():
-        output_tensor = net(image_tensor.to(device))
+
+        start = time.time()
+        output_tensor = net(image_tensor.to(device)) #가장 많은 시간 소요 u2net.forward()
+        end = time.time()
+        print(f"CPU mode : {end - start: .5f}s")
         output_tensor = F.log_softmax(output_tensor[0], dim=1)
         output_tensor = torch.max(output_tensor, dim=1, keepdim=True)[1]
         output_tensor = torch.squeeze(output_tensor, dim=0)
         output_arr = output_tensor.cpu().numpy()
-
+    
     classes_to_save = []
 
     # Check which classes are present in the image
@@ -137,11 +143,11 @@ def generate_mask(input_image, net, palette, device = 'cpu'):
         alpha_mask_img.save(os.path.join(alpha_out_dir, f'{cls}.png'))
 
     # Save final cloth segmentations
-    cloth_seg = Image.fromarray(output_arr[0].astype(np.uint8), mode='P')
-    cloth_seg.putpalette(palette)
-    cloth_seg = cloth_seg.resize(img_size, Image.BICUBIC)
-    cloth_seg.save(os.path.join(cloth_seg_out_dir, 'final_seg.png'))
-    return cloth_seg
+    # cloth_seg = Image.fromarray(output_arr[0].astype(np.uint8), mode='P')
+    # cloth_seg.putpalette(palette)
+    # cloth_seg = cloth_seg.resize(img_size, Image.BICUBIC)
+    # cloth_seg.save(os.path.join(cloth_seg_out_dir, 'final_seg.png'))
+    # return cloth_seg
 
 
 
@@ -167,26 +173,42 @@ def load_seg_model(checkpoint_path, device='cpu'):
     return net
 
 
-def main(args):
+# def main(args):
 
-    device = 'cuda:0' if args.cuda else 'cpu'
+#     device = 'cuda:0' if args.cuda else 'cpu'
+    
+#     # Create an instance of your model
+#     model = load_seg_model(args.checkpoint_path, device=device)
 
+#     palette = get_palette(2)
+
+#     img = Image.open(args.image).convert('RGB')
+
+#     cloth_seg = generate_mask(img, net=model, palette=palette, device=device)
+
+
+def main(device, img_path, checkpoint_path):
     # Create an instance of your model
-    model = load_seg_model(args.checkpoint_path, device=device)
+    model = load_seg_model(checkpoint_path, device=device)
 
-    palette = get_palette(4)
+    palette = get_palette(2)
 
-    img = Image.open(args.image).convert('RGB')
+    img = Image.open(img_path).convert('RGB')
 
     cloth_seg = generate_mask(img, net=model, palette=palette, device=device)
 
 
 
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Help to set arguments for Cloth Segmentation.')
-    parser.add_argument('--image', type=str, help='Path to the input image')
+    parser.add_argument('--image', default='input/03615_00.jpg', type=str, help='Path to the input image')
     parser.add_argument('--cuda', action='store_true', help='Enable CUDA (default: False)')
     parser.add_argument('--checkpoint_path', type=str, default='model/cloth_segm.pth', help='Path to the checkpoint file')
     args = parser.parse_args()
 
+    # gc.collect()
+    # torch.cuda.empty_cache()
+    print(args)
     main(args)

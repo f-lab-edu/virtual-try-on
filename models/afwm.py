@@ -179,7 +179,7 @@ class AFlowNet(nn.Module):
 
 class AFWM(nn.Module):
 
-    def __init__(self, opt, input_nc):
+    def __init__(self, input_nc):
         super(AFWM, self).__init__()
         num_filters = [64,128,256,256,256]
         self.image_features = FeatureEncoder(3, num_filters) 

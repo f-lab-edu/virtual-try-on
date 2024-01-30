@@ -24,7 +24,7 @@ class AlignedDataset(BaseDataset):
 
     def __getitem__(self, index):        
 
-        file_path ='inference_pairs.txt'
+        file_path ='test_pairs.txt'
         im_name, c_name = linecache.getline(file_path, index+1).strip().split()
 
         I_path = os.path.join(self.dir_I,im_name)

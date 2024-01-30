@@ -9,7 +9,6 @@ import numpy as np
 import torch
 import cv2
 import torch.nn.functional as F
-
 import gc
 
 
@@ -31,7 +30,7 @@ class VTryOnModel:
         return dataset, dataset_size
 
     def load_model(self):
-        self.warp_model = AFWM(self.opt, input_nc=3) # input number of channels
+        self.warp_model = AFWM(input_nc=3) # input number of channels
         print(self.warp_model)
         self.warp_model.eval()
         self.warp_model.cuda()
