@@ -8,9 +8,10 @@ import torch.nn as nn
 import os
 import numpy as np
 import torch
-from torchvision import transforms
+from torchvision.transforms import transforms
 import cv2
 import torch.nn.functional as F
+import random
 
 
 
@@ -26,19 +27,63 @@ if __name__ == "__main__":
     
     vton = VTryOnModel()
 
-    preprocess.generate_edge()
+    # preprocess.generate_edge()
     preprocess.resize()
 
 
 
-    cloth = Image.open("dataset/service_cloth/019119_1.jpg")
-    edge =  Image.open("dataset/service_edge/019119_1.jpg")
-    person = Image.open("dataset/service_img/005510_0.jpg")
+    cloth = Image.open("dataset/service_cloth/019119_1.jpg").convert('RGB')
+    edge =  Image.open("dataset/service_edge/019119_1.jpg").convert('L')
+    person = Image.open("dataset/service_img/005510_0.jpg").convert('RGB')
 
-    tf = transforms.ToTensor()
-    img_c = torch.unsqueeze(tf(cloth), 0)
-    img_e = torch.unsqueeze(tf(edge), 0)
-    img_p = torch.unsqueeze(tf(person), 0)
+    w, h = person.size
+    new_h = h
+    new_w = w
+
+    ############################################### // opt.resize_or_crop == None
+    # if opt.resize_or_crop == 'resize_and_crop':  
+    #     new_h = new_w = opt.loadSize            
+    # elif opt.resize_or_crop == 'scale_width_and_crop':
+    #     new_w = opt.loadSize
+    #     new_h = opt.loadSize * h // w
+    # x = random.randint(0, np.maximum(0, new_w - 512))
+    # y = random.randint(0, np.maximum(0, new_h - 512))
+    # flip = 0
+    # params = {'crop_pos':(x, y), 'flip' : flip}
+
+def __make_power_2(img, base, method=Image.BICUBIC):
+    ow, oh = img.size        
+    h = int(round(oh / base) * base)
+    w = int(round(ow / base) * base)
+    if (h == oh) and (w == ow):
+        return img
+    return img.resize((w, h), method)
+
+
+    transform_list = [transforms.Lambda(lambda img: __make_power_2(img, base=float(16), method=Image.BICUBIC))]
+    transform_list += [transforms.ToTensor()]
+    transform_list += [transforms.Normalize((0.5, 0.5, 0.5),
+                                            (0.5, 0.5, 0.5))]
+    tfFunc = transforms.Compose(transform_list)
+    
+    transform_list_edge = [transforms.Lambda(lambda img: __make_power_2(img, base=float(16), method=Image.NEAREST))]
+    transform_list_edge += [transforms.ToTensor()]
+    tfFunc_edge = transforms.Compose(transform_list_edge)
+
+    P_tensor = tfFunc(person)
+    C_tensor = tfFunc(cloth)
+    E_tensor = tfFunc_edge(edge)
+
+
+    img_c = torch.unsqueeze(C_tensor, 0)
+    img_e = torch.unsqueeze(E_tensor, 0)
+    img_p = torch.unsqueeze(P_tensor, 0)
+
+    print(img_c.size(), img_c)
+    print(img_e.size(), img_e)
+    print(img_p.size(), img_p) ## person img 만 dataloader 결과 다름
+
+
     
     edge = torch.FloatTensor((img_e.detach().numpy() > 0.5).astype(np.int))
     clothes = img_c * edge

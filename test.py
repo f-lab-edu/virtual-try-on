@@ -23,7 +23,7 @@ if __name__ == "__main__":
     dataset_size = len(data_loader)
     print(dataset_size)
 
-    warp_model = AFWM(3) ## 3 : number of channels
+    warp_model = AFWM(input_nc=3) ## 3 : number of channels
     print(warp_model)
     warp_model.eval()
     warp_model.cuda()
@@ -53,9 +53,11 @@ if __name__ == "__main__":
             ##edge is extracted from the clothes image with the built-in function in python
             edge = data['edge']
 
-            print(real_image.size(), real_image)
+            
             print(clothes.size(), clothes)
             print(edge.size(), edge)
+            print(real_image.size(), real_image)
+
             edge = torch.FloatTensor((edge.detach().numpy() > 0.5).astype(np.int))
             clothes = clothes * edge        
 
