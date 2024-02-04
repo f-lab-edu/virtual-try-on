@@ -19,13 +19,6 @@ import process, network, options
 #     path = output_path + f.split("/")[-1]
 #     img_resize.save(path)
 
-def __make_power_2(img, base, method=Image.BICUBIC):
-    ow, oh = img.size        
-    h = int(round(oh / base) * base)
-    w = int(round(ow / base) * base)
-    if (h == oh) and (w == ow):
-        return img
-    return img.resize((w, h), method)
 
 def generate_edge(
                     edge_exist = True,
@@ -45,17 +38,18 @@ def resize(resize=True):
     else:
         pass
 
-def img_to_tensor(cloth_path, edge_path, person_path):
-    cloth = Image.open(cloth_path).convert('RGB')
-    edge =  Image.open(edge_path).convert('L')
-    person = Image.open(person_path).convert('RGB')
+def img_to_tensor(img_root):
+    cloth = Image.open(img_root + 'service_cloth/' + '019119_1.jpg').convert('RGB')
+    edge =  Image.open(img_root + 'service_edge/' + '019119_1.jpg').convert('L')
+    person = Image.open(img_root + 'service_img/' + '005510_0.jpg').convert('RGB')
 
-    transform_list = [transforms.Lambda(lambda img: __make_power_2(img, base=float(16), method=Image.BICUBIC))]
-    transform_list += [transforms.ToTensor()]
+
+    # transform_list += [transforms.Lambda(lambda img: __make_power_2(img, base=float(16), method=Image.BICUBIC))]
+    transform_list = [transforms.ToTensor()]
     transform_list += [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
 
-    transform_list_edge = [transforms.Lambda(lambda img: __make_power_2(img, base=float(16), method=Image.NEAREST))]
-    transform_list_edge += [transforms.ToTensor()]
+    # transform_list_edge = [transforms.Lambda(lambda img: __make_power_2(img, base=float(16), method=Image.NEAREST))]
+    transform_list_edge = [transforms.ToTensor()]
 
     c_tensor = transforms.Compose(transform_list)(cloth)
     e_tensor = transforms.Compose(transform_list_edge)(edge)

@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     preprocess.generate_edge(config.edge_exist)
     preprocess.resize(config.resize)
-    c_tensor, e_tensor, p_tensor = preprocess.img_to_tensor(config.path_c, config.path_e, config.path_p)
+    c_tensor, e_tensor, p_tensor = preprocess.img_to_tensor(config.img_root)
 
     vton.infer(c_tensor, e_tensor, p_tensor)
 
