@@ -1,6 +1,7 @@
 from network import U2NET
 
 import os
+import logging
 from PIL import Image
 import cv2
 import gdown
@@ -116,7 +117,7 @@ def generate_mask(img_path, net, palette, output_path, device = 'cpu'):
         start = time.time()
         output_tensor = net(image_tensor.to(device)) #가장 많은 시간 소요 u2net.forward()
         end = time.time()
-        print(f"Segmentation 완료 ...{end - start: .5f}s 소요(CPU)")
+        logging.info(f"Segmentation Time Taken : {end - start: .5f}s (CPU)")
         output_tensor = F.log_softmax(output_tensor[0], dim=1)
         output_tensor = torch.max(output_tensor, dim=1, keepdim=True)[1]
         output_tensor = torch.squeeze(output_tensor, dim=0)

@@ -2,6 +2,7 @@ from models.networks import ResUnetGenerator, load_checkpoint
 from models.afwm import AFWM
 
 import os
+import logging
 import cv2
 import time
 import torch
@@ -21,7 +22,7 @@ class VTryOnModel:
         self.gen_model.eval()
         self.gen_model.cuda()
         load_checkpoint(model=self.gen_model, checkpoint_path='checkpoints\PFAFN\gen_model_final.pth')
-        print('모델 초기화 완료')
+        print('Model Initialized')
     
     def infer(self, c_tensor, e_tensor, p_tensor):
         start = time.time()
@@ -54,5 +55,5 @@ class VTryOnModel:
         bgr=cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
         cv2.imwrite(path + "output" +'.jpg',bgr)
         end = time.time()
-        print('추론 및 저장 완료!')
-        print(f'추론 소요 시간 : {end - start: .5f}s')
+        print('Inference Complete & Saved!')
+        logging.info(f'Inference Time Taken : {end - start: .5f}s')

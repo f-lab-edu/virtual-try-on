@@ -7,7 +7,7 @@ class Config():
 
 class DevelopmentConfig(Config):
     img_root = "dataset/"
-    edge_exist = True
+    edge_exist = False
     name = 'dev'
     resize = False
     device = 'cpu'
