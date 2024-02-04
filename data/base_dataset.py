@@ -78,6 +78,7 @@ def get_transform(opt, params, method=Image.BICUBIC, normalize=True):
     if normalize:
         transform_list += [transforms.Normalize((0.5, 0.5, 0.5),
                                                 (0.5, 0.5, 0.5))]
+    if method==Image.NEAREST:print('len of transform_list', transform_list)
     return transforms.Compose(transform_list)
 
 def normalize():    

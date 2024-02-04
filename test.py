@@ -53,10 +53,17 @@ if __name__ == "__main__":
             ##edge is extracted from the clothes image with the built-in function in python
             edge = data['edge']
 
+            npy_c = torch.from_numpy(np.load('npy_c.npy'))
+            npy_e = torch.from_numpy(np.load('npy_e.npy'))
+            npy_p = torch.from_numpy(np.load('npy_p.npy'))
+
+            print(torch.equal(npy_c,clothes))
+            print(torch.equal(npy_e,edge))
+            print(torch.equal(npy_p,real_image))
             
-            print(clothes.size(), clothes)
-            print(edge.size(), edge)
-            print(real_image.size(), real_image)
+            # print(clothes.size(), clothes)
+            # print(edge.size(), edge)
+            # print(real_image.size(), real_image)
 
             edge = torch.FloatTensor((edge.detach().numpy() > 0.5).astype(np.int))
             clothes = clothes * edge        
@@ -88,8 +95,6 @@ if __name__ == "__main__":
                 rgb=(cv_img*255).astype(np.uint8)
                 bgr=cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
                 cv2.imwrite(sub_path+'/'+str(step)+'.jpg',bgr)
-
-            print(f'{i}번째 데이터')
 
             step += 1
             if epoch_iter >= dataset_size:
