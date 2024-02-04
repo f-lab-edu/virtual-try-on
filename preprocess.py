@@ -28,16 +28,22 @@ def __make_power_2(img, base, method=Image.BICUBIC):
     return img.resize((w, h), method)
 
 def generate_edge(
+                    edge_exist = True,
                     device='cpu', 
                     img_path="u2_segment/input/019119_1.jpg",
                     checkpoint_path='u2_segment\model\cloth_segm.pth',
                     output_path='dataset\service_edge'
                 ):
-    
-    process.main(device, img_path, checkpoint_path, output_path)
+    if edge_exist: 
+        pass
+    else:
+        process.main(device, img_path, checkpoint_path, output_path)
 
-def resize():
-    pass
+def resize(resize=True):
+    if resize:
+        pass
+    else:
+        pass
 
 def img_to_tensor(cloth_path, edge_path, person_path):
     cloth = Image.open(cloth_path).convert('RGB')
