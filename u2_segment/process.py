@@ -162,7 +162,6 @@ def load_seg_model(checkpoint_path, device='cpu'):
     net = U2NET(in_ch=3, out_ch=4)
     check_or_download_model(checkpoint_path)
     
-
     net = load_checkpoint(net, checkpoint_path)
     net = net.to(device)
     net = net.eval()

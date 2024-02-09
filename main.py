@@ -24,6 +24,3 @@ if __name__ == "__main__":
     vton.infer(c_tensor, e_tensor, p_tensor)
 
 
-
-INFO:root:Segmentation Time Taken :  20.58530s (CPU)
-INFO:root:Inference Time Taken :  1.24623s

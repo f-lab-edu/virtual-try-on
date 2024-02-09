@@ -53,13 +53,13 @@ if __name__ == "__main__":
             ##edge is extracted from the clothes image with the built-in function in python
             edge = data['edge']
 
-            npy_c = torch.from_numpy(np.load('npy_c.npy'))
-            npy_e = torch.from_numpy(np.load('npy_e.npy'))
-            npy_p = torch.from_numpy(np.load('npy_p.npy'))
+            # npy_c = torch.from_numpy(np.load('npy_c.npy'))
+            # npy_e = torch.from_numpy(np.load('npy_e.npy'))
+            # npy_p = torch.from_numpy(np.load('npy_p.npy'))
 
-            print(torch.equal(npy_c,clothes))
-            print(torch.equal(npy_e,edge))
-            print(torch.equal(npy_p,real_image))
+            # print(torch.equal(npy_c,clothes))
+            # print(torch.equal(npy_e,edge))
+            # print(torch.equal(npy_p,real_image))
             
             # print(clothes.size(), clothes)
             # print(edge.size(), edge)

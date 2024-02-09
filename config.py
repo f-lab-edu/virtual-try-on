@@ -11,6 +11,7 @@ class DevelopmentConfig(Config):
     name = 'dev'
     resize = False
     device = 'cpu'
+    input_pairs = 'inference_pairs.txt'
 
     def __init__(self):
         print(f'img_root ={self.img_root}')
