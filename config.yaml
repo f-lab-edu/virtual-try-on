@@ -1,0 +1,10 @@
+# Device
+device: False
+
+# Data Configuration
+data:
+  root: "dataset/"
+  input_pairs: "inference_pairs.txt"
+  resize: False
+  edge_exist: True
+
