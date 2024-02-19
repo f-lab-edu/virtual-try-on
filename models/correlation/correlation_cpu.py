@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 import torch
-
-import numpy as np
-import cupy
 import math
 import re
 
@@ -272,157 +269,135 @@ def cupy_kernel(strFunction, objVariables):
 	return strKernel
 # end
 
-@cupy.util.memoize(for_each_device=True)
-def cupy_launch(strFunction, strKernel):
-	return cupy.cuda.compile_with_cache(strKernel).get_function(strFunction)
-# end
+# @cupy.util.memoize(for_each_device=True)
+# def cupy_launch(strFunction, strKernel):
+# 	return cupy.cuda.compile_with_cache(strKernel).get_function(strFunction)
+# # end
 
 class _FunctionCorrelation(torch.autograd.Function):
-    @staticmethod
-    def forward(self, first, second, intStride):
-        rbot0 = first.new_zeros([ first.shape[0], first.shape[2] + (6 * intStride), first.shape[3] + (6 * intStride), first.shape[1] ])
-        rbot1 = first.new_zeros([ first.shape[0], first.shape[2] + (6 * intStride), first.shape[3] + (6 * intStride), first.shape[1] ])
+	@staticmethod
+	def forward(self, first, second, intStride):
+		rbot0 = first.new_zeros([ first.shape[0], first.shape[2] + (6 * intStride), first.shape[3] + (6 * intStride), first.shape[1] ])
+		rbot1 = first.new_zeros([ first.shape[0], first.shape[2] + (6 * intStride), first.shape[3] + (6 * intStride), first.shape[1] ])
 
-        self.save_for_backward(first, second, rbot0, rbot1)
+		self.save_for_backward(first, second, rbot0, rbot1)
 
-        self.intStride = intStride
+		self.intStride = intStride
 
-        assert(first.is_contiguous() == True)
-        assert(second.is_contiguous() == True)
+		assert(first.is_contiguous() == True)
+		assert(second.is_contiguous() == True)
 
-        output = first.new_zeros([ first.shape[0], 49, int(math.ceil(first.shape[2] / intStride)), int(math.ceil(first.shape[3] / intStride)) ])
-        if first.is_cuda == True :
-            
-            # n = first.shape[2] * first.shape[3]
-            # cupy_launch('kernel_Correlation_rearrange', cupy_kernel('kernel_Correlation_rearrange', {
-            #     'intStride': self.intStride,
-            #     'input': first,
-            #     'output': rbot0
-            # }))(
-            #     grid=tuple([ int((n + 16 - 1) / 16), first.shape[1], first.shape[0] ]),
-            #     block=tuple([ 16, 1, 1 ]),
-            #     args=[ n, first.data_ptr(), rbot0.data_ptr() ]
-            # )
+		output = first.new_zeros([ first.shape[0], 49, int(math.ceil(first.shape[2] / intStride)), int(math.ceil(first.shape[3] / intStride)) ])
 
-            # n = second.shape[2] * second.shape[3]
-            # cupy_launch('kernel_Correlation_rearrange', cupy_kernel('kernel_Correlation_rearrange', {
-            #     'intStride': self.intStride,
-            #     'input': second,
-            #     'output': rbot1
-            # }))(
-            #     grid=tuple([ int((n + 16 - 1) / 16), second.shape[1], second.shape[0] ]),
-            #     block=tuple([ 16, 1, 1 ]),
-            #     args=[ n, second.data_ptr(), rbot1.data_ptr() ]
-            # )
+		if first.is_cuda == True:
+			n = first.shape[2] * first.shape[3]
+			cupy_launch('kernel_Correlation_rearrange', cupy_kernel('kernel_Correlation_rearrange', {
+				'intStride': self.intStride,
+				'input': first,
+				'output': rbot0
+			}))(
+				grid=tuple([ int((n + 16 - 1) / 16), first.shape[1], first.shape[0] ]),
+				block=tuple([ 16, 1, 1 ]),
+				args=[ n, first.data_ptr(), rbot0.data_ptr() ]
+			)
 
-            # n = output.shape[1] * output.shape[2] * output.shape[3]
-            # cupy_launch('kernel_Correlation_updateOutput', cupy_kernel('kernel_Correlation_updateOutput', {
-            #     'intStride': self.intStride,
-            #     'rbot0': rbot0,
-            #     'rbot1': rbot1,
-            #     'top': output
-            # }))(
-            #     grid=tuple([ output.shape[3], output.shape[2], output.shape[0] ]),
-            #     block=tuple([ 32, 1, 1 ]),
-            #     shared_mem=first.shape[1] * 4,
-            #     args=[ n, rbot0.data_ptr(), rbot1.data_ptr(), output.data_ptr() ]
-            # )
-            pass
-            
-        elif first.is_cuda == False:
-            pad_width = ((0, 0), (0, 0), (3 * intStride, 3 * intStride), (3 * intStride, 3 * intStride))
-            rbot0 = np.pad(first.detach().numpy(), pad_width, mode='constant')
-            rbot1 = np.pad(second.detach().numpy(), pad_width, mode='constant')
+			n = second.shape[2] * second.shape[3]
+			cupy_launch('kernel_Correlation_rearrange', cupy_kernel('kernel_Correlation_rearrange', {
+				'intStride': self.intStride,
+				'input': second,
+				'output': rbot1
+			}))(
+				grid=tuple([ int((n + 16 - 1) / 16), second.shape[1], second.shape[0] ]),
+				block=tuple([ 16, 1, 1 ]),
+				args=[ n, second.data_ptr(), rbot1.data_ptr() ]
+			)
 
-            output_shape = (first.shape[0], 49, int(np.ceil(first.shape[2] / intStride)), int(np.ceil(first.shape[3] / intStride)))
-            output = np.zeros(output_shape)
+			n = output.shape[1] * output.shape[2] * output.shape[3]
+			cupy_launch('kernel_Correlation_updateOutput', cupy_kernel('kernel_Correlation_updateOutput', {
+				'intStride': self.intStride,
+				'rbot0': rbot0,
+				'rbot1': rbot1,
+				'top': output
+			}))(
+				grid=tuple([ output.shape[3], output.shape[2], output.shape[0] ]),
+				block=tuple([ 32, 1, 1 ]),
+				shared_mem=first.shape[1] * 4,
+				args=[ n, rbot0.data_ptr(), rbot1.data_ptr(), output.data_ptr() ]
+			)
 
-            for b in range(first.shape[0]):  # batch dimension
-                for c in range(first.shape[1]):  # channel dimension
-                    for i in range(output_shape[2]):  # height dimension
-                        for j in range(output_shape[3]):  # width dimension
-                            # Extract the patch from the first tensor
-                            patch = rbot0[b, c,
-                                        i * intStride: i * intStride + 7,
-                                        j * intStride: j * intStride + 7]
-                            # Perform dot product with the corresponding patch in the second tensor
-                            second_patch = rbot1[b, c,
-                                                i * intStride: i * intStride + 7,
-                                                j * intStride: j * intStride + 7]
-                            # Perform dot product with the corresponding patch in the second tensor
-                            output[b, c, i, j] = np.sum(patch * second_patch)
-            return torch.tensor(output, dtype=first.dtype)
-        
-        # end
+		elif first.is_cuda == False:
+			pass
 
-        return output
-    # end
+		# end
 
-    @staticmethod
-    def backward(self, gradOutput):
-        first, second, rbot0, rbot1 = self.saved_tensors
+		return output
+	# end
 
-        assert(gradOutput.is_contiguous() == True)
+	@staticmethod
+	def backward(self, gradOutput):
+		first, second, rbot0, rbot1 = self.saved_tensors
 
-        gradFirst = first.new_zeros([ first.shape[0], first.shape[1], first.shape[2], first.shape[3] ]) if self.needs_input_grad[0] == True else None
-        gradSecond = first.new_zeros([ first.shape[0], first.shape[1], first.shape[2], first.shape[3] ]) if self.needs_input_grad[1] == True else None
+		assert(gradOutput.is_contiguous() == True)
 
-        if first.is_cuda == True:
-            if gradFirst is not None:
-                for intSample in range(first.shape[0]):
-                    n = first.shape[1] * first.shape[2] * first.shape[3]
-                    cupy_launch('kernel_Correlation_updateGradFirst', cupy_kernel('kernel_Correlation_updateGradFirst', {
-                        'intStride': self.intStride,
-                        'rbot0': rbot0,
-                        'rbot1': rbot1,
-                        'gradOutput': gradOutput,
-                        'gradFirst': gradFirst,
-                        'gradSecond': None
-                    }))(
-                        grid=tuple([ int((n + 512 - 1) / 512), 1, 1 ]),
-                        block=tuple([ 512, 1, 1 ]),
-                        args=[ n, intSample, rbot0.data_ptr(), rbot1.data_ptr(), gradOutput.data_ptr(), gradFirst.data_ptr(), None ]
-                    )
-                # end
-            # end
+		gradFirst = first.new_zeros([ first.shape[0], first.shape[1], first.shape[2], first.shape[3] ]) if self.needs_input_grad[0] == True else None
+		gradSecond = first.new_zeros([ first.shape[0], first.shape[1], first.shape[2], first.shape[3] ]) if self.needs_input_grad[1] == True else None
 
-            if gradSecond is not None:
-                for intSample in range(first.shape[0]):
-                    n = first.shape[1] * first.shape[2] * first.shape[3]
-                    cupy_launch('kernel_Correlation_updateGradSecond', cupy_kernel('kernel_Correlation_updateGradSecond', {
-                        'intStride': self.intStride,
-                        'rbot0': rbot0,
-                        'rbot1': rbot1,
-                        'gradOutput': gradOutput,
-                        'gradFirst': None,
-                        'gradSecond': gradSecond
-                    }))(
-                        grid=tuple([ int((n + 512 - 1) / 512), 1, 1 ]),
-                        block=tuple([ 512, 1, 1 ]),
-                        args=[ n, intSample, rbot0.data_ptr(), rbot1.data_ptr(), gradOutput.data_ptr(), None, gradSecond.data_ptr() ]
-                    )
-                # end
-            # end
+		if first.is_cuda == True:
+			if gradFirst is not None:
+				for intSample in range(first.shape[0]):
+					n = first.shape[1] * first.shape[2] * first.shape[3]
+					cupy_launch('kernel_Correlation_updateGradFirst', cupy_kernel('kernel_Correlation_updateGradFirst', {
+						'intStride': self.intStride,
+						'rbot0': rbot0,
+						'rbot1': rbot1,
+						'gradOutput': gradOutput,
+						'gradFirst': gradFirst,
+						'gradSecond': None
+					}))(
+						grid=tuple([ int((n + 512 - 1) / 512), 1, 1 ]),
+						block=tuple([ 512, 1, 1 ]),
+						args=[ n, intSample, rbot0.data_ptr(), rbot1.data_ptr(), gradOutput.data_ptr(), gradFirst.data_ptr(), None ]
+					)
+				# end
+			# end
 
-        elif first.is_cuda == False:
-            gradFirst, gradSecond = cpu_correlation_backward(first, second, rbot0, rbot1, gradOutput)
+			if gradSecond is not None:
+				for intSample in range(first.shape[0]):
+					n = first.shape[1] * first.shape[2] * first.shape[3]
+					cupy_launch('kernel_Correlation_updateGradSecond', cupy_kernel('kernel_Correlation_updateGradSecond', {
+						'intStride': self.intStride,
+						'rbot0': rbot0,
+						'rbot1': rbot1,
+						'gradOutput': gradOutput,
+						'gradFirst': None,
+						'gradSecond': gradSecond
+					}))(
+						grid=tuple([ int((n + 512 - 1) / 512), 1, 1 ]),
+						block=tuple([ 512, 1, 1 ]),
+						args=[ n, intSample, rbot0.data_ptr(), rbot1.data_ptr(), gradOutput.data_ptr(), None, gradSecond.data_ptr() ]
+					)
+				# end
+			# end
 
-        # end
+		elif first.is_cuda == False:
+			raise NotImplementedError()
 
-        return gradFirst, gradSecond, None
-    # end
-    # end
+		# end
+
+		return gradFirst, gradSecond, None
+	# end
+# end
 
 def FunctionCorrelation(tenFirst, tenSecond, intStride):
-    return _FunctionCorrelation.apply(tenFirst, tenSecond, intStride)
+	return _FunctionCorrelation.apply(tenFirst, tenSecond, intStride)
 # end
 
 class ModuleCorrelation(torch.nn.Module):
-    def __init__(self):
-        super(ModuleCorrelation, self).__init__()
-# end
+	def __init__(self):
+		super(ModuleCorrelation, self).__init__()
+	# end
 
-        def forward(self, tenFirst, tenSecond, intStride):
-            return _FunctionCorrelation.apply(tenFirst, tenSecond, intStride)
-        # end
-    # end
+	def forward(self, tenFirst, tenSecond, intStride):
+		return _FunctionCorrelation.apply(tenFirst, tenSecond, intStride)
+	# end
+# end
