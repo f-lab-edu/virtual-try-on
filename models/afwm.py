@@ -147,7 +147,7 @@ class AFlowNet(nn.Module):
 
     def forward(self, x, x_warps, x_conds, warp_feature=True):
         last_flow = None
-        print("x_warp length :", len(x_warps))
+        # print("x_warp length :", len(x_warps))
         for i in range(len(x_warps)):
           x_warp = x_warps[len(x_warps) - 1 - i]
           x_cond = x_conds[len(x_warps) - 1 - i]
@@ -160,11 +160,11 @@ class AFlowNet(nn.Module):
         
           if self.device == "gpu":
             input = correlation.FunctionCorrelation(tenFirst=x_warp_after, tenSecond=x_cond, intStride=1)
-            print("gpu corr:", input.size())
+            # print("gpu corr:", input.size())
             tenCorrelation = F.leaky_relu(input=correlation.FunctionCorrelation(tenFirst=x_warp_after, tenSecond=x_cond, intStride=1), negative_slope=0.1, inplace=False)
           elif self.device == "cpu":
             input = correlation_cpu.FunctionCorrelation(tenFirst=x_warp_after, tenSecond=x_cond, intStride=1)
-            print("cpu corr:", input.size())
+            # print("cpu corr:", input.size())
             tenCorrelation = F.leaky_relu(input=correlation_cpu.FunctionCorrelation(tenFirst=x_warp_after, tenSecond=x_cond, intStride=1), negative_slope=0.1, inplace=False)
           
           print("tenCorr : ", tenCorrelation.size())
