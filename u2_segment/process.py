@@ -97,7 +97,7 @@ def apply_transform(img):
     transform_rgb = transforms.Compose(transforms_list)
     return transform_rgb(img)
 
-def generate_mask(img_path, net, palette, output_path, device = 'cpu'):
+def generate_mask(img_path, net, palette, output_path, output_name, device = 'cpu'):
     #img = Image.open(input_image).convert('RGB')
     img = Image.open(img_path).convert('RGB')
     img_size = img.size
@@ -136,7 +136,7 @@ def generate_mask(img_path, net, palette, output_path, device = 'cpu'):
         alpha_mask = alpha_mask[0]  # Selecting the first channel to make it 2D
         alpha_mask_img = Image.fromarray(alpha_mask, mode='L')
         alpha_mask_img = alpha_mask_img.resize(img_size, Image.BICUBIC)
-        alpha_mask_img.save(os.path.join(alpha_out_dir, img_path.split("/")[-1]))
+        alpha_mask_img.save(os.path.join(alpha_out_dir, output_name))
         #  f'{cls}.jpg'   
 
     # Save final cloth segmentations
@@ -183,12 +183,12 @@ def load_seg_model(checkpoint_path, device='cpu'):
 #     cloth_seg = generate_mask(img, net=model, palette=palette, device=device)
 
 
-def main(device, img_path, checkpoint_path, output_path):
+def main(device, img_path, checkpoint_path, output_path, output_name):
     # Create an instance of your model
     model = load_seg_model(checkpoint_path, device=device)
     palette = get_palette(2)
     
-    cloth_seg = generate_mask(img_path, net=model, palette=palette, device=device, output_path=output_path)
+    cloth_seg = generate_mask(img_path, net=model, palette=palette, device=device, output_name=output_name, output_path=output_path)
 
 
 # if __name__ == '__main__':

@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .correlation import correlation
 from .correlation import correlation_cpu
+from torchsummary import summary
 
 
 def apply_offset(offset):
@@ -142,7 +143,7 @@ class AFlowNet(nn.Module):
 
         self.netMain = nn.ModuleList(self.netMain)
         self.netRefine = nn.ModuleList(self.netRefine)
-
+        
 
     def forward(self, x, x_warps, x_conds, warp_feature=True):
         last_flow = None
@@ -200,6 +201,8 @@ class AFWM(nn.Module):
         self.image_FPN = RefinePyramid(num_filters)
         self.cond_FPN = RefinePyramid(num_filters)
         self.aflow_net = AFlowNet(self.device, len(num_filters))
+        
+
 
     def forward(self, cond_input, image_input):
         cond_pyramids = self.cond_FPN(self.cond_features(cond_input)) # maybe use nn.Sequential

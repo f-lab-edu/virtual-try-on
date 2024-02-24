@@ -1,5 +1,6 @@
 from models.networks import ResUnetGenerator, load_checkpoint
 from models.afwm import AFWM
+from torchsummary import summary
 
 import os
 import logging
@@ -35,7 +36,8 @@ class VTryOnModel:
             clothes = clothes.cuda()
             edge = edge.cuda()
 
-        
+        # print("CPU AFWM MODEL",summary(self.warp_model(p_tensor, clothes), input_size=()))
+        # print("input size", p_tensor.size(), clothes.size())
         flow_out = self.warp_model(p_tensor, clothes)
 
         warped_cloth, last_flow = flow_out
@@ -43,6 +45,7 @@ class VTryOnModel:
                                     last_flow.permute(0, 2, 3, 1),
                                     mode='bilinear', padding_mode='zeros')
 
+        # print(p_tensor.size(), warped_cloth.size(), warped_edge.size())
         gen_inputs = torch.cat([p_tensor, warped_cloth, warped_edge], 1)
         gen_outputs = self.gen_model(gen_inputs)
         p_rendered, m_composite = torch.split(gen_outputs, [3, 1], 1)
@@ -61,6 +64,9 @@ class VTryOnModel:
         cv_img=(combine.permute(1,2,0).detach().cpu().numpy()+1)/2
         rgb=(cv_img*255).astype(np.uint8)
         bgr=cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
+
+        # cv2.imwrite(path+'debug'+'.jpg', warped_cloth)
+
         cv2.imwrite(path + "output" +'.jpg',bgr)
         end = time.time()
         print('Inference Complete & Saved!')

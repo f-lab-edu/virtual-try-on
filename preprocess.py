@@ -22,16 +22,18 @@ import process, network, options
 
 
 def generate_edge(
+                    output_name,
                     edge_exist = True,
                     device='cpu', 
                     img_path="u2_segment/input/019119_1.jpg",
                     checkpoint_path='u2_segment\model\cloth_segm.pth',
                     output_path='dataset\service_edge'
+                    
                 ):
     if edge_exist: 
         pass
     else:
-        process.main(device, img_path, checkpoint_path, output_path)
+        process.main(device, img_path, checkpoint_path, output_path, output_name)
 
 def resize(resize=True):
     if resize:
@@ -39,10 +41,10 @@ def resize(resize=True):
     else:
         pass
 
-def img_to_tensor(img_root):
-    cloth = Image.open(img_root + 'service_cloth/' + '019119_1.jpg').convert('RGB')
-    edge =  Image.open(img_root + 'service_edge/' + '019119_1.jpg').convert('L')
-    person = Image.open(img_root + 'service_img/' + '005510_0.jpg').convert('RGB')
+def img_to_tensor(cloth_path, edge_path, person_path):
+    cloth = Image.open(cloth_path).convert('RGB')
+    edge =  Image.open(edge_path).convert('L')
+    person = Image.open(person_path).convert('RGB')
 
 
     # transform_list += [transforms.Lambda(lambda img: __make_power_2(img, base=float(16), method=Image.BICUBIC))]
