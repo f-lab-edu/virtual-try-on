@@ -1,25 +1,12 @@
-from PIL import Image
 import os
-import logging
 import glob
 import sys
-sys.path.append("u2_segment/")
-
 import torch
 from torchvision.transforms import transforms
-import process, network, options
+from PIL import Image
 
-
-# input_path = '/kaggle/input/custom-data1/color/*.jpg'
-# output_path = '/kaggle/working/dataset/VITON-Clean/VITON_test/test_color/'
-# file_list = [file for file in glob.glob(input_path)]
-
-# for f in file_list:
-#     img = Image.open(f)
-#     img_resize = img.resize((192, 256))
-#     path = output_path + f.split("/")[-1]
-#     img_resize.save(path)
-
+sys.path.append("u2_segment/")
+import process
 
 def generate_edge(
                     output_name,
@@ -35,11 +22,11 @@ def generate_edge(
     else:
         process.main(device, img_path, checkpoint_path, output_path, output_name)
 
-def resize(resize=True):
+def resize(img_path):
     if resize:
-        pass
-    else:
-        pass
+        img = Image.open(img_path)
+        img_resize = img.resize((192, 256))
+        img_resize.save(img_path)
 
 def img_to_tensor(cloth_path, edge_path, person_path):
     cloth = Image.open(cloth_path).convert('RGB')

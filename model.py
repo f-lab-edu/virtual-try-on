@@ -1,7 +1,3 @@
-from models.networks import ResUnetGenerator, load_checkpoint
-from models.afwm import AFWM
-from torchsummary import summary
-
 import os
 import logging
 import cv2
@@ -10,6 +6,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+
+from models.networks import ResUnetGenerator, load_checkpoint
+from models.afwm import AFWM
+from torchsummary import summary
+
 
 class VTryOnModel:
 
