@@ -7,7 +7,6 @@ mode : "service"
 # Data Configuration
 data:
   root: "dataset/"
-  resize: False
   edge_exist: False
   cloth_path: "dataset/service_cloth/"
   edge_path: "dataset/service_edge/"
