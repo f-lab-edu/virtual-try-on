@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .correlation import correlation
+from .correlation import correlation_cpu
+from torchsummary import summary
+
 
 def apply_offset(offset):
 
@@ -110,8 +113,9 @@ class RefinePyramid(nn.Module):
 
 
 class AFlowNet(nn.Module):
-    def __init__(self, num_pyramid, fpn_dim=256):
+    def __init__(self, device, num_pyramid, fpn_dim=256):
         super(AFlowNet, self).__init__()
+        self.device = device
         self.netMain = []
         self.netRefine = []
         for i in range(num_pyramid):
@@ -139,11 +143,11 @@ class AFlowNet(nn.Module):
 
         self.netMain = nn.ModuleList(self.netMain)
         self.netRefine = nn.ModuleList(self.netRefine)
-
+        
 
     def forward(self, x, x_warps, x_conds, warp_feature=True):
         last_flow = None
-
+        # print("x_warp length :", len(x_warps))
         for i in range(len(x_warps)):
           x_warp = x_warps[len(x_warps) - 1 - i]
           x_cond = x_conds[len(x_warps) - 1 - i]
@@ -153,8 +157,17 @@ class AFlowNet(nn.Module):
                    mode='bilinear', padding_mode='border')
           else:
               x_warp_after = x_warp
-
-          tenCorrelation = F.leaky_relu(input=correlation.FunctionCorrelation(tenFirst=x_warp_after, tenSecond=x_cond, intStride=1), negative_slope=0.1, inplace=False)
+        
+          if self.device == "gpu":
+            input = correlation.FunctionCorrelation(tenFirst=x_warp_after, tenSecond=x_cond, intStride=1)
+            # print("gpu corr:", input.size())
+            tenCorrelation = F.leaky_relu(input=correlation.FunctionCorrelation(tenFirst=x_warp_after, tenSecond=x_cond, intStride=1), negative_slope=0.1, inplace=False)
+          elif self.device == "cpu":
+            input = correlation_cpu.FunctionCorrelation(tenFirst=x_warp_after, tenSecond=x_cond, intStride=1)
+            # print("cpu corr:", input.size())
+            tenCorrelation = F.leaky_relu(input=correlation_cpu.FunctionCorrelation(tenFirst=x_warp_after, tenSecond=x_cond, intStride=1), negative_slope=0.1, inplace=False)
+          
+          print("tenCorr : ", tenCorrelation.size())
           flow = self.netMain[i](tenCorrelation)
           flow = apply_offset(flow)
 
@@ -179,20 +192,23 @@ class AFlowNet(nn.Module):
 
 class AFWM(nn.Module):
 
-    def __init__(self, input_nc):
+    def __init__(self, device, input_nc):
         super(AFWM, self).__init__()
         num_filters = [64,128,256,256,256]
+        self.device = device
         self.image_features = FeatureEncoder(3, num_filters) 
         self.cond_features = FeatureEncoder(input_nc, num_filters)
         self.image_FPN = RefinePyramid(num_filters)
         self.cond_FPN = RefinePyramid(num_filters)
-        self.aflow_net = AFlowNet(len(num_filters))
+        self.aflow_net = AFlowNet(self.device, len(num_filters))
+        
+
 
     def forward(self, cond_input, image_input):
         cond_pyramids = self.cond_FPN(self.cond_features(cond_input)) # maybe use nn.Sequential
         image_pyramids = self.image_FPN(self.image_features(image_input))
 
-        x_warp, last_flow  = self.aflow_net(image_input, image_pyramids, cond_pyramids)
+        x_warp, last_flow  = self.aflow_net( image_input, image_pyramids, cond_pyramids)
 
         return x_warp, last_flow
 

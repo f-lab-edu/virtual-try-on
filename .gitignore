@@ -231,6 +231,7 @@ checkpoints/PFAFN/warp_model_final.pth
 *.ipynb
 
 *.png
+*.jpg
 
 .ipynb_checkpoints
 
