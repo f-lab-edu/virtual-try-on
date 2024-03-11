@@ -17,8 +17,8 @@ class Configuration(object):
 
             self.device = "gpu" if cfg["device"] else "cpu"
             self.edge_exist = cfg["data"]["edge_exist"]
-            self.resize = cfg["data"]["resize"]
             self.cloth_path = cfg["data"]["cloth_path"]
             self.edge_path = cfg["data"]["edge_path"]
             self.person_path = cfg["data"]["person_path"]
 
+opt = Configuration()
