@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .correlation import correlation
 from .correlation import correlation_cpu
-from torchsummary import summary
+
 
 
 def apply_offset(offset):
