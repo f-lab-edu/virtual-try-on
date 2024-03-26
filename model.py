@@ -9,7 +9,7 @@ import numpy as np
 
 from models.networks import ResUnetGenerator, load_checkpoint
 from models.afwm import AFWM
-from torchsummary import summary
+
 
 
 class VTryOnModel:
@@ -37,8 +37,7 @@ class VTryOnModel:
             clothes = clothes.cuda()
             edge = edge.cuda()
 
-        # print("CPU AFWM MODEL",summary(self.warp_model(p_tensor, clothes), input_size=()))
-        # print("input size", p_tensor.size(), clothes.size())
+    
         flow_out = self.warp_model(p_tensor, clothes)
 
         warped_cloth, last_flow = flow_out

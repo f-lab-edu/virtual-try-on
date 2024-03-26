@@ -5,7 +5,7 @@ import traceback
 import uuid
 
 # from async_generator import asynccontextmanager
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
 import uvicorn
 from PIL import Image
@@ -52,7 +52,7 @@ async def inference(c_tensor, e_tensor, p_tensor):
 
 
 @app.post("/upload-images")
-async def upload_person(cloth: UploadFile = File(...), person: UploadFile = File(...) ):
+async def upload_image(cloth: UploadFile = File(...), person: UploadFile = File(...) ):
     try:
         cloth_path = opt.cloth_path + f"{uuid.uuid4()}.jpg"
         person_path = opt.person_path + f"{uuid.uuid4()}.jpg"
@@ -82,4 +82,4 @@ async def upload_person(cloth: UploadFile = File(...), person: UploadFile = File
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host = "127.0.0.1", port=8000)
+    uvicorn.run(app, host = "0.0.0.0", port=8000)
