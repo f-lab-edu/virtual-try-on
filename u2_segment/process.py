@@ -113,7 +113,7 @@ def generate_mask(img_path, net, palette, output_path, output_name, device = 'cp
     # os.makedirs(cloth_seg_out_dir, exist_ok=True)
 
     with torch.no_grad():
-        print(' 마스크 이미지 생성 중..')
+        print(' Generating Edge Image..')
         start = time.time()
         output_tensor = net(image_tensor.to(device)) #가장 많은 시간 소요 u2net.forward()
         end = time.time()

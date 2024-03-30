@@ -410,7 +410,7 @@ class U2NET(nn.Module):
         # stage 6
         hx6 = self.stage6(hx)
         hx6up = _upsample_like(hx6, hx5)
-        print('Encoding 완료')
+        print('Encoding Complete..')
         # -------------------- decoder --------------------
         
         hx5d = self.stage5d(torch.cat((hx6up, hx5), 1))
@@ -426,7 +426,7 @@ class U2NET(nn.Module):
         hx2dup = _upsample_like(hx2d, hx1)
 
         hx1d = self.stage1d(torch.cat((hx2dup, hx1), 1))
-        print('Decoding 완료')
+        print('Decoding Complete ..')
         # side output
 
         d1 = self.side1(hx1d)

@@ -19,12 +19,12 @@ class VTryOnModel:
         self.warp_model = AFWM(self.device, input_nc=3)
         self.warp_model.eval()
         if self.device=="gpu":self.warp_model.cuda() 
-        load_checkpoint(model=self.warp_model, checkpoint_path='checkpoints\PFAFN\warp_model_final.pth')
+        load_checkpoint(model=self.warp_model, checkpoint_path='/workspace/checkpoints/PFAFN/warp_model_final.pth')
 
         self.gen_model = ResUnetGenerator(7, 4, 5, ngf=64, norm_layer=nn.BatchNorm2d)
         self.gen_model.eval()
         if self.device=="gpu" : self.gen_model.cuda() 
-        load_checkpoint(model=self.gen_model, checkpoint_path='checkpoints\PFAFN\gen_model_final.pth')
+        load_checkpoint(model=self.gen_model, checkpoint_path='/workspace/checkpoints/PFAFN/gen_model_final.pth')
         print('Model Initialized')
     
     def infer(self, c_tensor, e_tensor, p_tensor):
