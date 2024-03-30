@@ -6,9 +6,9 @@ mode : "service"
 
 # Data Configuration
 data:
-  root: "dataset/"
+  root: "/workspace/"
   edge_exist: False
-  cloth_path: "dataset/service_cloth/"
-  edge_path: "dataset/service_edge/"
-  person_path: "dataset/service_img/"
+  cloth_path: "/workspace/dataset/service_cloth/"
+  edge_path: "/workspace/dataset/service_edge/"
+  person_path: "/workspace/dataset/service_img/"
 

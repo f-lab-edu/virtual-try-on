@@ -13,7 +13,7 @@ def generate_edge(
                     edge_exist = True,
                     device='cpu', 
                     img_path="u2_segment/input/019119_1.jpg",
-                    checkpoint_path='u2_segment\model\cloth_segm.pth',
+                    checkpoint_path='/workspace/u2_segment/model/cloth_segm.pth',
                     output_path='dataset\service_edge'
                     
                 ):
