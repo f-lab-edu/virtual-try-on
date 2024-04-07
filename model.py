@@ -9,6 +9,7 @@ import numpy as np
 
 from models.networks import ResUnetGenerator, load_checkpoint
 from models.afwm import AFWM
+from config.config import opt
 
 
 
@@ -67,7 +68,7 @@ class VTryOnModel:
 
         # cv2.imwrite(path+'debug'+'.jpg', warped_cloth)
 
-        cv2.imwrite(path + "output" +'.jpg',bgr)
+        cv2.imwrite(opt.root + "output" +'.jpg',bgr)
         end = time.time()
         print('Inference Complete & Saved!')
         logging.info(f'Inference Time Taken : {end - start: .5f}s')

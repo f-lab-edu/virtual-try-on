@@ -135,7 +135,7 @@ def generate_mask(img_path, net, palette, output_path, output_name, device = 'cp
         alpha_mask = (output_arr == cls).astype(np.uint8) * 255
         alpha_mask = alpha_mask[0]  # Selecting the first channel to make it 2D
         alpha_mask_img = Image.fromarray(alpha_mask, mode='L')
-        alpha_mask_img = alpha_mask_img.resize(img_size, Image.BICUBIC)
+        alpha_mask_img = alpha_mask_img.resize((192,256), Image.BICUBIC)
         alpha_mask_img.save(os.path.join(alpha_out_dir, output_name))
         #  f'{cls}.jpg'   
 

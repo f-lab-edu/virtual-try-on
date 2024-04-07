@@ -167,7 +167,7 @@ class AFlowNet(nn.Module):
             # print("cpu corr:", input.size())
             tenCorrelation = F.leaky_relu(input=correlation_cpu.FunctionCorrelation(tenFirst=x_warp_after, tenSecond=x_cond, intStride=1), negative_slope=0.1, inplace=False)
           
-          print("tenCorr : ", tenCorrelation.size())
+        #   print("tenCorr : ", tenCorrelation.size())
           flow = self.netMain[i](tenCorrelation)
           flow = apply_offset(flow)
 
