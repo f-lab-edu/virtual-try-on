@@ -3,6 +3,7 @@ asgiref==3.4.1
 asn1crypto==0.24.0
 backcall==0.1.0
 beautifulsoup4==4.7.1
+boto3==1.23.10
 certifi==2019.3.9
 cffi==1.12.3
 chardet==3.0.4
