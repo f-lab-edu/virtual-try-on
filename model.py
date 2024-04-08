@@ -1,5 +1,6 @@
 import os
 import logging
+import uuid
 import cv2
 import time
 import torch
@@ -28,7 +29,7 @@ class VTryOnModel:
         load_checkpoint(model=self.gen_model, checkpoint_path='/workspace/checkpoints/PFAFN/gen_model_final.pth')
         print('Model Initialized')
     
-    def infer(self, c_tensor, e_tensor, p_tensor):
+    def infer(self, c_tensor, e_tensor, p_tensor, job_id):
         start = time.time()
         edge = torch.FloatTensor((e_tensor.detach().numpy() > 0.5).astype(np.int))
         clothes = c_tensor * edge
@@ -46,7 +47,6 @@ class VTryOnModel:
                                     last_flow.permute(0, 2, 3, 1),
                                     mode='bilinear', padding_mode='zeros')
 
-        # print(p_tensor.size(), warped_cloth.size(), warped_edge.size())
         gen_inputs = torch.cat([p_tensor, warped_cloth, warped_edge], 1)
         gen_outputs = self.gen_model(gen_inputs)
         p_rendered, m_composite = torch.split(gen_outputs, [3, 1], 1)
@@ -66,9 +66,7 @@ class VTryOnModel:
         rgb=(cv_img*255).astype(np.uint8)
         bgr=cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
 
-        # cv2.imwrite(path+'debug'+'.jpg', warped_cloth)
-
-        cv2.imwrite(opt.root + "output" +'.jpg',bgr)
+        cv2.imwrite(opt.output_path + job_id + "_output.jpg",bgr)
         end = time.time()
         print('Inference Complete & Saved!')
         logging.info(f'Inference Time Taken : {end - start: .5f}s')

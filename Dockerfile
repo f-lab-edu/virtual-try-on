@@ -9,6 +9,8 @@ RUN apt-get update -y && apt-get install -y \
     libglib2.0-0 \
     libsm6 libxext6 libxrender-dev 
 
+    
 CMD ["main.py"]
+
 ENTRYPOINT ["python"]
 
