@@ -11,4 +11,5 @@ data:
   cloth_path: "/workspace/dataset/service_cloth/"
   edge_path: "/workspace/dataset/service_edge/"
   person_path: "/workspace/dataset/service_img/"
+  output_path: "/workspace/results/"
 

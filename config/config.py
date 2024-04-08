@@ -21,6 +21,7 @@ class Configuration(object):
             self.cloth_path = cfg["data"]["cloth_path"]
             self.edge_path = cfg["data"]["edge_path"]
             self.person_path = cfg["data"]["person_path"]
+            self.output_path = cfg["data"]["output_path"]
 
     def load_credential(self, config_file="config/ncpconfig.yaml"):
         with open(config_file, 'r') as f:

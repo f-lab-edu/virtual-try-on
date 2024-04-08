@@ -66,7 +66,7 @@ class VTryOnModel:
         rgb=(cv_img*255).astype(np.uint8)
         bgr=cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
 
-        cv2.imwrite(opt.root + "results/" + job_id + "_output.jpg",bgr)
+        cv2.imwrite(opt.output_path + job_id + "_output.jpg",bgr)
         end = time.time()
         print('Inference Complete & Saved!')
         logging.info(f'Inference Time Taken : {end - start: .5f}s')
