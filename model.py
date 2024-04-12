@@ -61,7 +61,9 @@ class VTryOnModel:
         person_figure = p_tensor.float()
         cloth_figure = clothes
         result_figure = p_tryon
-        combine = torch.cat([person_figure[0],cloth_figure[0],result_figure[0]], 2).squeeze()
+        # combine = torch.cat([person_figure[0],cloth_figure[0],result_figure[0]], 2).squeeze()
+        combine = result_figure.squeeze()
+        
         cv_img=(combine.permute(1,2,0).detach().cpu().numpy()+1)/2
         rgb=(cv_img*255).astype(np.uint8)
         bgr=cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
