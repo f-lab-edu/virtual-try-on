@@ -10,9 +10,10 @@ import uvicorn
 import boto3
 from PIL import Image
 
-from model import VTryOnModel
+from src.model import VTryOnModel
+from src import preprocessor, upload
 from config.config import opt
-import preprocessor
+
 
 
 logging.basicConfig(filename='error.log', level=logging.DEBUG)
@@ -20,7 +21,7 @@ app = FastAPI()
 vton = VTryOnModel(opt.device)
 
 s3 = boto3.client(service_name = opt.service_name, endpoint_url=opt.endpoint_url, aws_access_key_id=opt.access_key, aws_secret_access_key=opt.secret_key)
-bucket_name = "vton-storage"
+bucket_name = os.environ["bucketname"]
 
 async def generate_img(cloth_path, person_path, output_path, job_id):
     edge_path = opt.edge_path + job_id +"_edge.jpg"

@@ -11,6 +11,8 @@ RUN apt-get update -y && apt-get install -y \
 
 COPY . /workspace
 
+ENV bucketname="vton-storage"
+
 # CMD ["main.py"]
 
 # ENTRYPOINT ["python"]
